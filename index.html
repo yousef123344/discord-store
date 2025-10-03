@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجر المشتريات - تفاعلي</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(to right, #ece9e6, #ffffff); margin:0; padding:0;}
+  .container { max-width: 900px; margin: 20px auto; padding: 10px; }
+  h1,h2,h3 { margin-bottom: 10px; color:#333; }
+  .products, .cart, .orders { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.3s; }
+  .products:hover, .cart:hover, .orders:hover { transform: translateY(-3px); }
+  .product, .cart-item, .order-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee; transition: background 0.2s; }
+  .product:last-child, .cart-item:last-child, .order-item:last-child { border-bottom:none; }
+  .product:hover { background: #f9f9f9; }
+  button { padding:10px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; transition: all 0.2s ease; }
+  button:hover { transform: scale(1.05); opacity:0.9; }
+  .btn-add { background:#4CAF50; color:#fff; }
+  .btn-remove { background:#f44336; color:#fff; }
+  .btn-order { background:#2196F3; color:#fff; margin-top:10px; width:100%; font-size:16px; }
+  input[type="text"], input[type="file"] { width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; }
+  .modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100; }
+  .modal.show { display:flex; animation:slideDown 0.3s ease forwards; }
+  .modal-content { background:#fff; padding:30px; border-radius:15px; max-width:400px; width:90%; box-shadow:0 12px 30px rgba(0,0,0,0.3); text-align:center; transform: scale(0.8); opacity:0; animation:fadeInScale 0.3s forwards; }
+  .modal-content h2 { margin-bottom:20px; }
+  .modal button { width:100%; margin:10px 0; padding:12px; font-size:16px; }
+  .receipt-preview { max-width:100%; max-height:200px; margin-top:10px; border-radius:10px; }
+  .copy-btn { background:#2196F3; color:#fff; margin-top:5px; }
+  .payment-option { border:1px solid #ddd; padding:14px; border-radius:10px; margin:10px 0; background:#f9f9f9; transition: background 0.2s; }
+  .payment-option:hover { background:#f0f0f0; }
+  /* Toasts */
+  .toast-container { position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:10px; }
+  .toast { background:#333; color:#fff; padding:12px 18px; border-radius:10px; min-width:220px; opacity:0.9; animation:fadein 0.3s, fadeout 0.5s 2.5s; }
+  @keyframes fadein { from {opacity:0; transform:translateY(20px);} to {opacity:0.9; transform:translateY(0);} }
+  @keyframes fadeout { from {opacity:0.9;} to {opacity:0; transform:translateY(20px);} }
+  @keyframes slideDown { from {opacity:0;} to {opacity:1;} }
+  @keyframes fadeInScale { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>متجر المشتريات — ديسكورد</h1>
+
+  <div class="products">
+    <h2>المنتجات</h2>
+    <div id="product-list"></div>
+  </div>
+
+  <div class="cart">
+    <h2>سلة المشتريات</h2>
+    <input type="text" id="buyer-name" placeholder="اسم المشتري">
+    <input type="text" id="note" placeholder="ملاحظة (اختياري)">
+    <div id="cart-list"></div>
+    <div style="margin-top:10px;font-weight:bold;">المجموع: $<span id="cart-total">0.00</span></div>
+    <button class="btn-order" id="checkout-btn">إتمام الطلب</button>
+  </div>
+
+  <div class="orders">
+    <h2>طلبات سابقة</h2>
+    <div id="orders-list">لم يتم تسجيل أي طلبات بعد.</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="payment-modal">
+  <div class="modal-content">
+    <h2>اختر وسيلة الدفع</h2>
+    <button id="apple-pay" style="background:#000;color:#fff;">Apple Pay (تجريبي)</button>
+    
+    <div class="payment-option">
+      <p>ومض — أرسل على الرقم: <strong>65980169</strong></p>
+      <button class="copy-btn" id="copy-number">نسخ الرقم</button>
+    </div>
+
+    <div class="payment-option">
+      <label>رفع صورة الدفع (إيصال):</label>
+      <input type="file" id="receipt-upload" accept="image/*">
+      <img id="receipt-preview" class="receipt-preview" src="" alt="">
+    </div>
+
+    <button id="open-discord" style="display:none; background:#4CAF50; color:white;">فتح سيرفر الديسكورد</button>
+    <button id="close-modal" style="margin-top:5px; border:1px solid #ccc; background:#fff;">إلغاء</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+const products = [
+  {id:'nitro', title:'نيروهات (Nitro)', price:2.99},
+  {id:'posts', title:'بوستات', price:1.5},
+  {id:'fort', title:'حسابات فورت (Fortnite accounts)', price:9.99},
+  {id:'fivem_warn', title:'شراء انذار فايف ام60', price:4.99},
+];
+
+let cart = [];
+let orders = JSON.parse(localStorage.getItem('orders')||'[]');
+
+function showToast(msg){
+  const container = document.getElementById('toast-container');
+  const div = document.createElement('div');
+  div.className='toast';
+  div.innerText = msg;
+  container.appendChild(div);
+  setTimeout(()=>{div.remove();},3000);
+}
+
+function renderProducts() {
+  const container = document.getElementById('product-list');
+  container.innerHTML='';
+  products.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='product';
+    div.innerHTML=`<span>${p.title} - $${p.price}</span><button class="btn-add">أضف إلى السلة</button>`;
+    div.querySelector('button').addEventListener('click',()=>{cart.push(p); renderCart(); showToast('تم إضافة المنتج إلى السلة');});
+    container.appendChild(div);
+  });
+}
+
+function renderCart() {
+  const container=document.getElementById('cart-list');
+  container.innerHTML='';
+  if(cart.length===0){container.innerHTML='السلّة فارغة';}
+  cart.forEach((item,index)=>{
+    const div=document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`<span>${item.title} - $${item.price}</span><button class="btn-remove">إزالة</button>`;
+    div.querySelector('button').addEventListener('click',()=>{cart.splice(index,1); renderCart(); showToast('تم إزالة المنتج من السلة');});
+    container.appendChild(div);
+  });
+  const total=cart.reduce((s,it)=>s+it.price,0);
+  document.getElementById('cart-total').innerText=total.toFixed(2);
+}
+
+function renderOrders() {
+  const container=document.getElementById('orders-list');
+  if(orders.length===0){container.innerText='لم يتم تسجيل أي طلبات بعد'; return;}
+  container.innerHTML='';
+  orders.forEach(o=>{
+    const div=document.createElement('div');
+    div.className='order-item';
+    div.innerHTML=`<span>${o.buyer} - $${o.total.toFixed(2)}</span>`;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('checkout-btn').addEventListener('click',()=>{
+  if(cart.length===0){showToast('السلّة فارغة'); return;}
+  const buyer=document.getElementById('buyer-name').value||'غير معروف';
+  const note=document.getElementById('note').value||'';
+  const total=cart.reduce((s,it)=>s+it.price,0);
+  const order={buyer,note,items:[...cart],total,date:new Date().toISOString()};
+  orders.unshift(order);
+  localStorage.setItem('orders',JSON.stringify(orders));
+  cart=[];
+  renderCart();
+  renderOrders();
+  document.getElementById('buyer-name').value='';
+  document.getElementById('note').value='';
+  const modal = document.getElementById('payment-modal');
+  modal.classList.add('show');
+  document.getElementById('receipt-preview').src='';
+  document.getElementById('open-discord').style.display='none';
+  showToast('تم إنشاء الطلب بنجاح! اختر وسيلة الدفع');
+});
+
+document.getElementById('apple-pay').addEventListener('click',()=>{
+  showToast('تمت محاكاة دفع Apple Pay بنجاح ✅');
+  document.getElementById('open-discord').style.display='block';
+});
+
+document.getElementById('copy-number').addEventListener('click',()=>{
+  navigator.clipboard.writeText('65980169');
+  showToast('تم نسخ رقم ومض: 65980169');
+  document.getElementById('open-discord').style.display='block';
+});
+
+document.getElementById('receipt-upload').addEventListener('change',(e)=>{
+  const file=e.target.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onloadend=()=>{
+      document.getElementById('receipt-preview').src=reader.result;
+      document.getElementById('open-discord').style.display='block';
+      showToast('تم رفع صورة الدفع بنجاح ✅');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+document.getElementById('open-discord').addEventListener('click',()=>{
+  window.open('https://discord.gg/fAfE4QGW','_blank');
+  const modal = document.getElementById('payment-modal');
+  modal.classList.remove('show');
+  showToast('تم فتح سيرفر الديسكورد 🎉');
+});
+
+document.getElementById('close-modal').addEventListener('click',()=>{
+  document.getElementById('payment-modal').classList.remove('show');
+  showToast('تم إغلاق نافذة الدفع');
+});
+
+renderProducts();
+renderCart();
+renderOrders();
+</script>
+
+</body>
+</html>
