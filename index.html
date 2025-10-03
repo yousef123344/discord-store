@@ -209,58 +209,7 @@ document.getElementById('close-modal').addEventListener('click',()=>{
   showToast('تم إغلاق نافذة الدفع');
 });
 
-  const products = [
-  {id:'nitro', title:'نيروهات (Nitro)', price:2.99, stock: 5},
-  {id:'posts', title:'بوستات', price:1.5, stock: 10},
-  {id:'fort', title:'حسابات فورت', price:9.99, stock: 3},
-  {id:'fivem_warn', title:'شراء انذار فايف ام60', price:4.99, stock: 2},
-];
 
-function renderProducts() {
-  const container = document.getElementById('product-list');
-  container.innerHTML='';
-  products.forEach(p=>{
-    const div=document.createElement('div');
-    div.className='product';
-    div.innerHTML=`
-      <span>${p.title} - $${p.price} | الكمية المتاحة: ${p.stock}</span>
-      <button class="btn-add" ${p.stock===0 ? 'disabled style="background:#ccc;cursor:not-allowed;"':''}>أضف إلى السلة</button>
-    `;
-    div.querySelector('button').addEventListener('click',()=>{
-      if(p.stock>0){
-        cart.push(p);
-        p.stock--;
-        renderCart();
-        renderProducts();
-        showToast('تم إضافة المنتج إلى السلة');
-      }
-    });
-    container.appendChild(div);
-  });
-}
-
-function renderCart() {
-  const container=document.getElementById('cart-list');
-  container.innerHTML='';
-  if(cart.length===0){container.innerHTML='السلّة فارغة';}
-  cart.forEach((item,index)=>{
-    const div=document.createElement('div');
-    div.className='cart-item';
-    div.innerHTML=`<span>${item.title} - $${item.price}</span><button class="btn-remove">إزالة</button>`;
-    div.querySelector('button').addEventListener('click',()=>{
-      cart.splice(index,1);
-      // ارجاع الكمية عند إزالة المنتج
-      const prod = products.find(p=>p.id===item.id);
-      if(prod){ prod.stock++; }
-      renderCart();
-      renderProducts();
-      showToast('تم إزالة المنتج من السلة');
-    });
-    container.appendChild(div);
-  });
-  const total=cart.reduce((s,it)=>s+it.price,0);
-  document.getElementById('cart-total').innerText=total.toFixed(2);
-}
 
 
 renderProducts();
