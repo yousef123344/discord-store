@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجر عشوائي - مع دفع وهمي وخصومات</title>
+<style>
+    :root{--primary:#1e90ff;--accent:#0d6efd}
+    body { font-family: Arial, sans-serif; background: #f4f6fb; margin:0; padding:0; direction: rtl; }
+    header { background:var(--primary); color:white; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px }
+    header h1{margin:0;font-size:20px}
+    nav button { margin-left:8px; padding:7px 12px; border:none; border-radius:6px; cursor:pointer; background:var(--accent); color:white; }
+    .layout { display:flex; gap:20px; padding:18px; align-items:flex-start }
+    .main { flex:1 }
+    .container { display:flex; flex-wrap:wrap; gap:16px; justify-content:flex-start }
+    .product { background:white; width:200px; margin:6px; padding:10px; border-radius:10px; text-align:center; box-shadow:0 6px 16px rgba(13,30,60,0.06); }
+    .product img { width:100%; border-radius:8px; cursor:pointer; height:150px; object-fit:cover }
+    button.primary { background:var(--primary); color:white; border:none; padding:8px 12px; margin-top:8px; cursor:pointer; border-radius:6px }
+    .side { width:320px }
+    #cartCard { background:white; padding:12px; border-radius:10px; box-shadow:0 6px 16px rgba(13,30,60,0.06); }
+    #cart-items{list-style:none;padding:0;margin:0; max-height:320px; overflow:auto}
+    #cart-items li{padding:8px 6px;border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center}
+    .controls{display:flex;gap:8px; align-items:center}
+    .small{font-size:13px;color:#555}
+    .filters{display:flex; gap:10px; align-items:center; margin:12px 0}
+    input[type="number"], input[type="text"], select { padding:6px; border-radius:6px; border:1px solid #ddd }
+    #detailsModal{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center}
+    #detailsModal .content{background:white; width:360px;padding:18px;border-radius:10px}
+    .center{display:flex; justify-content:center}
+    .muted{color:#666;font-size:13px}
+    .success{background:#e6ffef;border:1px solid #b7f0d1;padding:10px;border-radius:8px;color:#0b6b3a}
+    .spinner{display:inline-block; width:18px; height:18px; border:3px solid #ddd; border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{padding:12px;text-align:center;color:#666}
+</style>
+</head>
+<body>
+<header>
+    <h1>متجر عشوائي</h1>
+    <div style="display:flex;align-items:center;gap:12px">
+        <nav>
+            <button onclick="showPage('home')">الرئيسية</button>
+            <button onclick="showPage('cartPage')">السلة</button>
+        </nav>
+        <div id="user-login" style="background:white;padding:8px;border-radius:8px;color:#111">
+            <span id="user-name">ضيف</span>
+            <div style="margin-top:6px">
+                <input id="username" placeholder="اسمك" style="width:120px">
+                <button onclick="login()" style="padding:6px 8px">تسجيل</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="layout">
+    <div class="main">
+        <div id="homePage">
+            <div class="filters">
+                <label class="small">نوع:
+                    <select id="filterType" onchange="renderProducts()"><option value="all">الكل</option></select>
+                </label>
+                <label class="small">سعر أقصى:
+                    <input type="number" id="maxPrice" value="100" onchange="renderProducts()">
+                </label>
+                <label class="small">البحث:
+                    <input type="text" id="searchInput" placeholder="ابحث باسم المنتج" oninput="renderProducts()">
+                </label>
+                <button onclick="refreshProducts()">تحديث عشوائي</button>
+            </div>
+            <div class="container" id="product-container"></div>
+        </div>
+
+        <div id="cartPage" style="display:none">
+            <div id="cartCard">
+                <h3>السلة</h3>
+                <ul id="cart-items"></ul>
+                <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div class="small">الإجمالي قبل الخصم: <strong id="subtotal">0.00</strong> د.ك</div>
+                        <div class="small">الخصم: <strong id="applied-discount">0%</strong></div>
+                        <div style="margin-top:6px">المجموع النهائي: <strong id="total">0.00</strong> د.ك</div>
+                    </div>
+                    <div style="width:160px;text-align:center">
+                        <input id="coupon" placeholder="كود خصم (اختياري)" style="width:100%;margin-bottom:6px">
+                        <button class="primary" onclick="proceedToCheckout()">الدفع</button>
+                    </div>
+                </div>
+                <div style="margin-top:8px" class="muted">سيتم حفظ طلبك محلياً (وهمي) وسيظهر رقم الطلب بعد إتمام الدفع.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side">
+        <div id="cartSummary" style="position:sticky;top:20px">
+            <div id="cartCard" style="padding:12px">
+                <h3>ملخص السلة</h3>
+                <div class="small">العناصر: <span id="cart-count">0</span></div>
+                <div class="small" style="margin-top:8px">مجموع تقريبي: <strong id="mini-total">0.00</strong> د.ك</div>
+                <div style="margin-top:12px" class="center">
+                    <button onclick="showPage('cartPage')" class="primary">اذهب للسلة</button>
+                </div>
+            </div>
+            <div style="height:12px"></div>
+            <div style="background:white;padding:12px;border-radius:10px;box-shadow:0 6px 16px rgba(13,30,60,0.06)">
+                <h4>آخر الطلبات</h4>
+                <div id="ordersList" class="small muted">لا توجد طلبات حتى الآن</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="detailsModal">
+    <div class="content">
+        <h2 id="detail-name"></h2>
+        <img id="detail-image" src="" style="width:100%;border-radius:8px;margin:8px 0;height:180px;object-fit:cover">
+        <p>السعر: <strong id="detail-price"></strong> د.ك</p>
+        <p class="muted" id="detail-desc">وصف سريع للمنتج. يمكنك إضافة وصف أطول حسب رغبتك.</p>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <button onclick="closeDetails()">إغلاق</button>
+            <button class="primary" onclick="addToCart(detailProductId); closeDetails();">أضف إلى السلة</button>
+        </div>
+    </div>
+</div>
+
+<div id="checkoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center">
+    <div style="background:white;padding:18px;border-radius:10px;width:420px">
+        <h3>صفحة الدفع الوهمي</h3>
+        <div class="small">اسم المشتري: <strong id="checkout-name"></strong></div>
+        <div style="margin-top:8px">
+            <label class="small">عنوان (اختياري)</label>
+            <input id="address" placeholder="عنوانك" style="width:100%;margin-top:6px">
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+            <label class="small">طريقة الدفع:</label>
+            <select id="payMethod"><option>بطاقة (وهمي)</option><option>محفظة وهمية</option><option>تحويل بنكي وهمي</option></select>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+            <div class="small">المجموع النهائي: <strong id="checkout-amount">0.00</strong> د.ك</div>
+            <div>
+                <button onclick="closeCheckout()">إلغاء</button>
+                <button class="primary" onclick="confirmPayment()" id="payBtn">ادفع الآن</button>
+            </div>
+        </div>
+        <div id="payStatus" style="margin-top:10px"></div>
+    </div>
+</div>
+
+<div id="orderSuccessModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center">
+    <div style="background:white;padding:18px;border-radius:10px;width:420px">
+        <h3>نجاح الدفع</h3>
+        <div class="success">تم إنشاء الطلب بنجاح! رقم الطلب: <strong id="order-id"></strong></div>
+        <div style="margin-top:10px">المبلغ المدفوع: <strong id="order-amount"></strong> د.ك</div>
+        <div style="margin-top:10px"><button class="primary" onclick="closeOrderSuccess()">حسناً</button></div>
+    </div>
+</div>
+
+<footer>مثال تعليمي — هذا دفع وهمي ولا يتصل بأي بوابة حقيقية.</footer>
+
+<script>
+    // بيانات وأساليب
+    const productNames = ["تيشيرت","فستان","حذاء","حقيبة","نظارة","بنطال","جاكيت","ساعة"];
+    let products = [];
+    const types = new Set();
+
+    function generateProducts(count=20){
+        products = [];
+        for(let i=0;i<count;i++){
+            const type = productNames[Math.floor(Math.random()*productNames.length)];
+            types.add(type);
+            products.push({id:i, name: type + ' ' + (Math.floor(Math.random()*900)+100), price: (Math.random()*80+5).toFixed(2), image: `https://picsum.photos/400?random=${Math.floor(Math.random()*1000)}`, type: type});
+        }
+    }
+
+    generateProducts(24);
+
+    // LocalStorage: cart, username, orders
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const usernameStored = localStorage.getItem('username');
+    if(usernameStored) document.getElementById('user-name').textContent = usernameStored;
+
+    // ملء فلتر الأنواع
+    const filterTypeSelect = document.getElementById('filterType');
+    function populateTypes(){
+        filterTypeSelect.innerHTML = '<option value="all">الكل</option>';
+        Array.from(types).forEach(t=>{ const opt = document.createElement('option'); opt.value=t; opt.textContent=t; filterTypeSelect.appendChild(opt); });
+    }
+    populateTypes();
+
+    function refreshProducts(){
+        // توليد جديد وإعادة تحميل الواجهات
+        types.clear();
+        generateProducts(24);
+        populateTypes();
+        renderProducts();
+        alert('تم تحديث المنتجات عشوائياً');
+    }
+
+    function renderProducts(){
+        const container = document.getElementById('product-container'); container.innerHTML='';
+        const selectedType = filterTypeSelect.value;
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+        const search = document.getElementById('searchInput').value.trim();
+        let filtered = products.filter(p => (selectedType==='all' || p.type===selectedType) && parseFloat(p.price) <= maxPrice && p.name.includes(search));
+        filtered.sort(()=>Math.random()-0.5);
+        filtered.forEach(p => {
+            const div = document.createElement('div'); div.className='product';
+            div.innerHTML = `<img src="${p.image}" alt="${p.name}" onclick="showDetails(${p.id})"><h3>${p.name}</h3><p class='small'>${p.price} د.ك</p><div style='display:flex;gap:8px;justify-content:center'><button class='primary' onclick='addToCart(${p.id})'>أضف إلى السلة</button></div>`;
+            container.appendChild(div);
+        });
+    }
+
+    renderProducts();
+
+    // تفاصيل المنتج
+    let detailProductId = null;
+    function showDetails(id){
+        const p = products.find(x=>x.id===id);
+        if(!p) return;
+        detailProductId = id;
+        document.getElementById('detail-name').textContent = p.name;
+        document.getElementById('detail-image').src = p.image;
+        document.getElementById('detail-price').textContent = p.price;
+        document.getElementById('detailsModal').style.display = 'flex';
+    }
+    function closeDetails(){ document.getElementById('detailsModal').style.display='none'; }
+
+    // سلة المشتريات
+    function addToCart(id){
+        const p = products.find(x=>x.id===id);
+        if(!p) return;
+        cart.push(p);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCartSummary();
+    }
+
+    function renderCartSummary(){
+        document.getElementById('cart-count').textContent = cart.length;
+        const miniTotal = cart.reduce((s,i)=>s+parseFloat(i.price),0);
+        document.getElementById('mini-total').textContent = miniTotal.toFixed(2);
+
+        // if on cart page also render details
+        const cartItemsEl = document.getElementById('cart-items');
+        if(cartItemsEl){
+            cartItemsEl.innerHTML = '';
+            cart.forEach((item, idx)=>{
+                const li = document.createElement('li');
+                li.innerHTML = `<div>${item.name} <div class='small'>${item.price} د.ك</div></div><div class='controls'><button onclick='removeFromCart(${idx})'>حذف</button></div>`;
+                cartItemsEl.appendChild(li);
+            });
+            document.getElementById('subtotal').textContent = miniTotal.toFixed(2);
+            // reset discount display
+            document.getElementById('applied-discount').textContent = '0%';
+            document.getElementById('total').textContent = miniTotal.toFixed(2);
+            document.getElementById('mini-total').textContent = miniTotal.toFixed(2);
+        }
+    }
+
+    function removeFromCart(index){ cart.splice(index,1); localStorage.setItem('cart', JSON.stringify(cart)); renderCartSummary(); }
+
+    renderCartSummary();
+
+    // تسجيل المستخدم
+    function login(){ const name = document.getElementById('username').value.trim(); if(!name) return alert('اكتب اسمك'); document.getElementById('user-name').textContent = name; localStorage.setItem('username', name); document.getElementById('username').value = ''; }
+
+    // الانتقال بين الصفحات
+    function showPage(page){ document.getElementById('homePage').style.display = page==='home' ? 'block' : 'none'; document.getElementById('cartPage').style.display = page==='cartPage' ? 'block' : 'none'; if(page==='cartPage') renderCartSummary(); }
+
+    // الدفع: تطبيق خصم عشوائي أو كود
+    let currentDiscountPercent = 0;
+    function proceedToCheckout(){
+        if(cart.length===0) return alert('السلة فارغة');
+        const user = localStorage.getItem('username');
+        if(!user) return alert('يرجى تسجيل الاسم قبل الدفع');
+
+        // احسب الخصم: إذا كان هناك كود صالح نطبقه، وإلا نعطي خصم عشوائي بين 5-25%
+        const coupon = document.getElementById('coupon').value.trim();
+        if(coupon){
+            // أمثلة على أكواد بسيطة
+            const coupons = { 'SAVE10':10, 'VIP20':20, 'WELCOME5':5 };
+            const up = coupon.toUpperCase();
+            if(coupons[up]) currentDiscountPercent = coupons[up]; else currentDiscountPercent = Math.floor(Math.random()*6)+3; // كود غير معروف -> خصم عشوائي صغير
+        } else {
+            currentDiscountPercent = Math.floor(Math.random()*21)+5; // 5 - 25%
+        }
+
+        // احسب الأرقام
+        const subtotal = cart.reduce((s,i)=>s+parseFloat(i.price),0);
+        const discountAmount = subtotal * (currentDiscountPercent/100);
+        const total = subtotal - discountAmount;
+
+        document.getElementById('applied-discount').textContent = currentDiscountPercent + '%';
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('total').textContent = total.toFixed(2);
+
+        // فتح نافذة الدفع
+        document.getElementById('checkout-name').textContent = user;
+        document.getElementById('checkout-amount').textContent = total.toFixed(2);
+        document.getElementById('checkoutModal').style.display = 'flex';
+    }
+
+    function closeCheckout(){ document.getElementById('checkoutModal').style.display = 'none'; }
+
+    function confirmPayment(){
+        const payBtn = document.getElementById('payBtn'); payBtn.disabled = true; const status = document.getElementById('payStatus'); status.innerHTML = '<span class="spinner"></span> جارٍ معالجة الدفع...';
+        // محاكاة تأخير الشبكة/المعالجة
+        setTimeout(()=>{
+            // انشاء رقم طلب عشوائي
+            const orderId = 'ORD' + Date.now().toString().slice(-6) + Math.floor(Math.random()*900).toString();
+            const subtotal = cart.reduce((s,i)=>s+parseFloat(i.price),0);
+            const discountAmount = +(subtotal * (currentDiscountPercent/100)).toFixed(2);
+            const total = +(subtotal - discountAmount).toFixed(2);
+            const order = {
+                id: orderId,
+                date: new Date().toISOString(),
+                items: cart,
+                subtotal: subtotal.toFixed(2),
+                discountPercent: currentDiscountPercent,
+                discountAmount: discountAmount.toFixed(2),
+                total: total.toFixed(2),
+                buyer: localStorage.getItem('username') || 'ضيف'
+            };
+            orders.unshift(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            // مسح السلة
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCartSummary();
+            // إظهار نجاح
+            document.getElementById('checkoutModal').style.display = 'none';
+            document.getElementById('order-id').textContent = orderId;
+            document.getElementById('order-amount').textContent = order.total;
+            document.getElementById('orderSuccessModal').style.display = 'flex';
+            // إعادة تهيئة زر الدفع
+            payBtn.disabled = false; status.innerHTML = '';
+            renderOrdersList();
+        }, 1500);
+    }
+
+    function closeOrderSuccess(){ document.getElementById('orderSuccessModal').style.display='none'; showPage('home'); }
+
+    function renderOrdersList(){
+        const el = document.getElementById('ordersList');
+        if(!orders || orders.length===0){ el.textContent = 'لا توجد طلبات حتى الآن'; return; }
+        el.innerHTML = orders.slice(0,5).map(o => `<div>رقم ${o.id} — ${new Date(o.date).toLocaleString()} — ${o.total} د.ك</div>`).join('');
+    }
+
+    renderOrdersList();
+
+    // تحميل أولي
+    renderCartSummary();
+
+    // For development: reset storage with URL param ?reset=1
+    if(new URLSearchParams(location.search).get('reset')==='1'){ localStorage.clear(); cart=[]; orders=[]; location.href = location.pathname; }
+
+</script>
+</body>
+</html>
