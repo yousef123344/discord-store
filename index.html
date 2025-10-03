@@ -3,44 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>𝟔𝟎 𝐒𝐓𝐎𝐑𝐄 𝟏𝐊</title>
+<title>𝟔𝟎 𝐒𝐓𝐎𝐑𝐄 𝟏𝐊 - نسخة الكمبيوتر</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(to right, #ece9e6, #ffffff); margin:0; padding:0;}
-  .container { max-width: 900px; margin: 20px auto; padding: 10px; }
-  h1,h2,h3 { margin-bottom: 10px; color:#333; }
-  .products, .cart, .orders { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.3s; }
-  .products:hover, .cart:hover, .orders:hover { transform: translateY(-3px); }
-  .product, .cart-item, .order-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee; transition: background 0.2s; }
-  .product:last-child, .cart-item:last-child, .order-item:last-child { border-bottom:none; }
-  .product:hover { background: #f9f9f9; }
-  button { padding:10px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; transition: all 0.2s ease; }
-  button:hover { transform: scale(1.05); opacity:0.9; }
-  .btn-add { background:#4CAF50; color:#fff; }
-  .btn-remove { background:#f44336; color:#fff; }
-  .btn-order { background:#2196F3; color:#fff; margin-top:10px; width:100%; font-size:16px; }
-  input[type="text"], input[type="file"] { width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; }
-  .modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100; }
-  .modal.show { display:flex; animation:slideDown 0.3s ease forwards; }
-  .modal-content { background:#fff; padding:30px; border-radius:15px; max-width:400px; width:90%; box-shadow:0 12px 30px rgba(0,0,0,0.3); text-align:center; transform: scale(0.8); opacity:0; animation:fadeInScale 0.3s forwards; }
-  .modal-content h2 { margin-bottom:20px; }
-  .modal button { width:100%; margin:10px 0; padding:12px; font-size:16px; }
-  .receipt-preview { max-width:100%; max-height:200px; margin-top:10px; border-radius:10px; }
-  .copy-btn { background:#2196F3; color:#fff; margin-top:5px; }
-  .payment-option { border:1px solid #ddd; padding:14px; border-radius:10px; margin:10px 0; background:#f9f9f9; transition: background 0.2s; }
-  .payment-option:hover { background:#f0f0f0; }
-  /* Toasts */
-  .toast-container { position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:10px; }
-  .toast { background:#333; color:#fff; padding:12px 18px; border-radius:10px; min-width:220px; opacity:0.9; animation:fadein 0.3s, fadeout 0.5s 2.5s; }
-  @keyframes fadein { from {opacity:0; transform:translateY(20px);} to {opacity:0.9; transform:translateY(0);} }
-  @keyframes fadeout { from {opacity:0.9;} to {opacity:0; transform:translateY(20px);} }
-  @keyframes slideDown { from {opacity:0;} to {opacity:1;} }
-  @keyframes fadeInScale { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
+body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:0; background:#f0f2f5;}
+.container { max-width:1200px; margin:20px auto; padding:20px; }
+h1,h2,h3 { margin-bottom:15px; color:#222; text-align:center; }
+input[type="text"], input[type="file"] { width:100%; padding:12px; border-radius:10px; border:1px solid #ccc; margin-bottom:12px; font-size:16px; }
+button { padding:14px 20px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size:16px; transition: all 0.2s ease; }
+button:hover { transform: scale(1.05); opacity:0.9; }
+.toast-container { position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:12px; }
+.toast { background:#333; color:#fff; padding:14px 20px; border-radius:12px; min-width:240px; opacity:0.95; animation:fadein 0.3s, fadeout 0.5s 2.5s; font-size:15px;}
+@keyframes fadein { from {opacity:0; transform:translateY(20px);} to {opacity:0.95; transform:translateY(0);} }
+@keyframes fadeout { from {opacity:0.95;} to {opacity:0; transform:translateY(20px);} }
+.hidden { display:none; }
+
+/* Store */
+.products, .cart, .orders { background:#fff; padding:25px; border-radius:15px; margin-bottom:25px; box-shadow:0 10px 25px rgba(0,0,0,0.1); transition: transform 0.3s; }
+.products:hover, .cart:hover, .orders:hover { transform: translateY(-3px); }
+.product, .cart-item, .order-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #eee; transition: background 0.2s; font-size:18px;}
+.product:last-child, .cart-item:last-child, .order-item:last-child { border-bottom:none; }
+.product:hover { background:#f9f9f9; }
+.btn-add { background:#28a745; color:#fff; padding:12px 20px; font-size:16px; }
+.btn-remove { background:#dc3545; color:#fff; padding:12px 20px; font-size:16px; }
+.btn-order { background:#007bff; color:#fff; margin-top:15px; width:100%; font-size:18px; padding:14px; border-radius:12px; }
+
+/* Modal */
+.modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100; }
+.modal.show { display:flex; animation:slideDown 0.3s ease forwards; }
+.modal-content { background:#fff; padding:35px; border-radius:20px; max-width:450px; width:95%; box-shadow:0 15px 35px rgba(0,0,0,0.35); text-align:center; transform: scale(0.8); opacity:0; animation:fadeInScale 0.3s forwards; }
+.modal-content h2 { margin-bottom:25px; font-size:22px; }
+.receipt-preview { max-width:100%; max-height:220px; margin-top:12px; border-radius:12px; }
+.copy-btn { background:#007bff; color:#fff; margin-top:8px; padding:10px 15px; border-radius:10px; }
+.payment-option { border:1px solid #ddd; padding:16px; border-radius:12px; margin:12px 0; background:#f9f9f9; transition: background 0.2s; font-size:16px;}
+.payment-option:hover { background:#f0f0f0; }
+
+@keyframes slideDown { from {opacity:0;} to {opacity:1;} }
+@keyframes fadeInScale { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>𝟔𝟎 𝐒𝐓𝐎𝐑𝐄 𝟏𝐊 — ديسكورد</h1>
+<div class="container" id="store-screen">
+  <h1> 𝟔𝟎 𝐒𝐓𝐎𝐑𝐄 𝟏𝐊 — نسخة الكمبيوتر</h1>
 
   <div class="products">
     <h2>المنتجات</h2>
@@ -49,20 +53,19 @@
 
   <div class="cart">
     <h2>سلة المشتريات</h2>
-    <input type="text" id="buyer-name" placeholder="اسم المشتري">
     <input type="text" id="note" placeholder="ملاحظة (اختياري)">
     <div id="cart-list"></div>
-    <div style="margin-top:10px;font-weight:bold;">المجموع: $<span id="cart-total">0.00</span></div>
+    <div style="margin-top:12px;font-weight:bold;">المجموع: $<span id="cart-total">0.00</span></div>
     <button class="btn-order" id="checkout-btn">إتمام الطلب</button>
   </div>
 
   <div class="orders">
-    <h2>طلبات سابقة</h2>
-    <div id="orders-list">لم يتم تسجيل أي طلبات بعد.</div>
+    <h2>طلباتك السابقة</h2>
+    <div id="orders-list">لم تقم بأي طلبات بعد.</div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal الدفع -->
 <div class="modal" id="payment-modal">
   <div class="modal-content">
     <h2>اختر وسيلة الدفع</h2>
@@ -79,148 +82,103 @@
       <img id="receipt-preview" class="receipt-preview" src="" alt="">
     </div>
 
-    <button id="open-discord" style="display:none; background:#4CAF50; color:white;">فتح سيرفر الديسكورد</button>
-    <button id="close-modal" style="margin-top:5px; border:1px solid #ccc; background:#fff;">إلغاء</button>
+    <button id="open-discord" style="display:none; background:#28a745; color:white; font-size:18px; padding:12px; border-radius:12px;">فتح سيرفر الديسكورد</button>
+    <button id="close-modal" style="margin-top:8px; border:1px solid #ccc; background:#fff; font-size:16px; padding:10px; border-radius:10px;">إلغاء</button>
   </div>
 </div>
 
-<!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
 
 <script>
 const products = [
-  {id:'nitro', title:'🛒〡نـيـتـرو (Nitro)', price:2.500}, stock:2},
-  {id:'posts', title:'🛒〡بـوسـتـات', price:1750}, stock:2},
-  {id:'fort', title:'🛒〡ألـعـاب ', price:1.200}, stock:2},
-  {id:'fivem_', title:'🛒〡بـرمـجـه', price:3.500}, stock:2},
-  {id:'fivem_', title:'🛒〡اعـضـاء', price:1.000}, stock:2},
-  {id:'fivem_', title:'⌨〢كسر・سرعة・كيبورد', price:1.000}, stock:2},
-  {id:'fivem_', title:'🎮〢كسر・سرعة・يد', price:1.500}, stock:2},
-  {id:'fivem_', title:'📷〢ريـــشـــيـــد', price:1.250}, stock:2},
-  {id:'fivem_', title:'🎬〢تـــويـــك', price:1.500}, stock:2},
-  {id:'fivem_', title:'🚨・انــذار・فــايــف・ام', price:1.000}, stock:2},
-  {id:'fivem_', title:'📁〢ايـــدي・نـــيـــم', price:1.000}, stock:2},
+ {id:'nitro', title:'🛒〡نـيـتـرو (Nitro)', price:2.500, stock:2},
+  {id:'posts', title:'🛒〡بـوسـتـات', price:1750, stock:2},
+  {id:'fort', title:'🛒〡ألـعـاب ', price:1.200, stock:2},
+  {id:'fivem_', title:'🛒〡بـرمـجـه', price:3.500, stock:2},
+  {id:'fivem_', title:'🛒〡اعـضـاء', price:1.000, stock:2},
+  {id:'fivem_', title:'⌨〢كسر・سرعة・كيبورد', price:1.000, stock:2},
+  {id:'fivem_', title:'🎮〢كسر・سرعة・يد', price:1.500, stock:2},
+  {id:'fivem_', title:'📷〢ريـــشـــيـــد', price:1.250, stock:2},
+  {id:'fivem_', title:'🎬〢تـــويـــك', price:1.500, stock:2},
+  {id:'fivem_', title:'🚨・انــذار・فــايــف・ام', price:1.000, stock:2},
+  {id:'fivem_', title:'📁〢ايـــدي・نـــيـــم', price:1.000,stock:2},
 ];
 
 let cart = [];
 let orders = JSON.parse(localStorage.getItem('orders')||'[]');
 
 function showToast(msg){
-  const container = document.getElementById('toast-container');
-  const div = document.createElement('div');
-  div.className='toast';
-  div.innerText = msg;
-  container.appendChild(div);
-  setTimeout(()=>{div.remove();},3000);
+  const container=document.getElementById('toast-container');
+  const div=document.createElement('div');
+  div.className='toast'; div.innerText=msg; container.appendChild(div);
+  setTimeout(()=>div.remove(),3000);
 }
 
-function renderProducts() {
-  const container = document.getElementById('product-list');
-  container.innerHTML='';
+function renderProducts(){
+  const container=document.getElementById('product-list'); container.innerHTML='';
   products.forEach(p=>{
-    const div=document.createElement('div');
-    div.className='product';
-    div.innerHTML=`<span>${p.title} - $${p.price}</span><button class="btn-add">أضف إلى السلة</button>`;
-    div.querySelector('button').addEventListener('click',()=>{cart.push(p); renderCart(); showToast('تم إضافة المنتج إلى السلة');});
+    const div=document.createElement('div'); div.className='product';
+    div.innerHTML=`<span>${p.title} - $${p.price} | الكمية المتاحة: ${p.stock}</span>
+      <button class="btn-add" ${p.stock===0?'disabled style="background:#ccc;cursor:not-allowed;"':''}>أضف إلى السلة</button>`;
+    div.querySelector('button').addEventListener('click',()=>{
+      if(p.stock>0){ cart.push(p); p.stock--; renderCart(); renderProducts(); showToast('تم إضافة المنتج إلى السلة'); }
+    });
     container.appendChild(div);
   });
 }
 
-function renderCart() {
-  const container=document.getElementById('cart-list');
-  container.innerHTML='';
+function renderCart(){
+  const container=document.getElementById('cart-list'); container.innerHTML='';
   if(cart.length===0){container.innerHTML='السلّة فارغة';}
   cart.forEach((item,index)=>{
-    const div=document.createElement('div');
-    div.className='cart-item';
+    const div=document.createElement('div'); div.className='cart-item';
     div.innerHTML=`<span>${item.title} - $${item.price}</span><button class="btn-remove">إزالة</button>`;
-    div.querySelector('button').addEventListener('click',()=>{cart.splice(index,1); renderCart(); showToast('تم إزالة المنتج من السلة');});
+    div.querySelector('button').addEventListener('click',()=>{
+      cart.splice(index,1);
+      const prod=products.find(p=>p.id===item.id); if(prod) prod.stock++;
+      renderCart(); renderProducts(); showToast('تم إزالة المنتج من السلة');
+    });
     container.appendChild(div);
   });
-  const total=cart.reduce((s,it)=>s+it.price,0);
-  document.getElementById('cart-total').innerText=total.toFixed(2);
+  document.getElementById('cart-total').innerText=cart.reduce((s,it)=>s+it.price,0).toFixed(2);
 }
 
-function renderOrders() {
+function renderOrders(){
   const container=document.getElementById('orders-list');
-  if(orders.length===0){container.innerText='لم يتم تسجيل أي طلبات بعد'; return;}
+  if(orders.length===0){ container.innerText='لم تقم بأي طلبات بعد'; return; }
   container.innerHTML='';
   orders.forEach(o=>{
-    const div=document.createElement('div');
-    div.className='order-item';
-    div.innerHTML=`<span>${o.buyer} - $${o.total.toFixed(2)}</span>`;
+    const div=document.createElement('div'); div.className='order-item';
+    div.innerHTML=`<span>${o.date.split('T')[0]} - $${o.total.toFixed(2)}</span>`;
     container.appendChild(div);
   });
 }
 
+// Checkout
 document.getElementById('checkout-btn').addEventListener('click',()=>{
-  if(cart.length===0){showToast('السلّة فارغة'); return;}
-  const buyer=document.getElementById('buyer-name').value||'غير معروف';
+  if(cart.length===0){ showToast('السلّة فارغة'); return; }
   const note=document.getElementById('note').value||'';
   const total=cart.reduce((s,it)=>s+it.price,0);
-  const order={buyer,note,items:[...cart],total,date:new Date().toISOString()};
-  orders.unshift(order);
-  localStorage.setItem('orders',JSON.stringify(orders));
-  cart=[];
-  renderCart();
-  renderOrders();
-  document.getElementById('buyer-name').value='';
+  const order={items:[...cart],total,note,date:new Date().toISOString()};
+  orders.unshift(order); localStorage.setItem('orders',JSON.stringify(orders));
+  cart=[]; renderCart(); renderOrders();
   document.getElementById('note').value='';
-  const modal = document.getElementById('payment-modal');
-  modal.classList.add('show');
+  const modal=document.getElementById('payment-modal'); modal.classList.add('show');
   document.getElementById('receipt-preview').src='';
   document.getElementById('open-discord').style.display='none';
-  showToast('تم إنشاء الطلب بنجاح! اختر وسيلة الدفع');
+  showToast('تم إنشاء الطلب! اختر وسيلة الدفع');
 });
 
-document.getElementById('apple-pay').addEventListener('click',()=>{
-  showToast('تمت محاكاة دفع Apple Pay بنجاح ✅');
-  document.getElementById('open-discord').style.display='block';
-});
+// Payment
+document.getElementById('apple-pay').addEventListener('click',()=>{ showToast('تمت محاكاة دفع Apple Pay ✅'); document.getElementById('open-discord').style.display='block'; });
+document.getElementById('copy-number').addEventListener('click',()=>{ navigator.clipboard.writeText('65980169'); showToast('تم نسخ رقم ومض: 65980169'); document.getElementById('open-discord').style.display='block'; });
+document.getElementById('receipt-upload').addEventListener('change',(e)=>{ const file=e.target.files[0]; if(file){ const reader=new FileReader(); reader.onloadend=()=>{ document.getElementById('receipt-preview').src=reader.result; document.getElementById('open-discord').style.display='block'; showToast('تم رفع صورة الدفع ✅'); }; reader.readAsDataURL(file); }});
+document.getElementById('open-discord').addEventListener('click',()=>{ window.open('https://discord.gg/fAfE4QGW','_blank'); document.getElementById('payment-modal').classList.remove('show'); showToast('تم فتح سيرفر الديسكورد 🎉'); });
+document.getElementById('close-modal').addEventListener('click',()=>{ document.getElementById('payment-modal').classList.remove('show'); });
 
-document.getElementById('copy-number').addEventListener('click',()=>{
-  navigator.clipboard.writeText('65980169');
-  showToast('تم نسخ رقم ومض: 65980169');
-  document.getElementById('open-discord').style.display='block';
-});
-
-document.getElementById('receipt-upload').addEventListener('change',(e)=>{
-  const file=e.target.files[0];
-  if(file){
-    const reader=new FileReader();
-    reader.onloadend=()=>{
-      document.getElementById('receipt-preview').src=reader.result;
-      document.getElementById('open-discord').style.display='block';
-      showToast('تم رفع صورة الدفع بنجاح ✅');
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-document.getElementById('open-discord').addEventListener('click',()=>{
-  window.open('https://discord.gg/fAfE4QGW','_blank');
-  const modal = document.getElementById('payment-modal');
-  modal.classList.remove('show');
-  showToast('تم فتح سيرفر الديسكورد 🎉');
-});
-
-document.getElementById('close-modal').addEventListener('click',()=>{
-  document.getElementById('payment-modal').classList.remove('show');
-  showToast('تم إغلاق نافذة الدفع');
-});
-
-
-
-
-renderProducts();
-renderCart();
-renderOrders();
+// Initialize
+renderProducts(); renderCart(); renderOrders();
 </script>
 
 </body>
 </html>
-
-
-
-
-
